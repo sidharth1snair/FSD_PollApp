@@ -43,12 +43,12 @@
             font-size: 1rem;
             padding: 8px 12px;
             border-radius: 4px;
-            transition: background-color 0.3s ease;
+            /* transition: background-color 0.3s ease; */
         }
 
-        .nav-links a:hover {
+        /* .nav-links a:hover {
             background-color: #45a049;
-        }
+        } */
 
         .page-header {
             text-align: center;
@@ -135,9 +135,10 @@
         <div class="logo">Pollister</div>
         <nav>
             <ul class="nav-links">
-                <!-- <li><a href="/">Home</a></li> -->
-                <li><a href="#">Logout</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
             </ul>
+            
+            
         </nav>
     </header>
 

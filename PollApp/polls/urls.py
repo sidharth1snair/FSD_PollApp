@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.contrib.auth.views import LogoutView
+
 
 urlpatterns = [
     path('', views.home, name='home'),  # Homepage
@@ -16,4 +18,7 @@ urlpatterns = [
     path('poll/<int:poll_id>/delete/', views.delete_poll, name='delete_poll'), 
     path('polls/results/', views.poll_result, name='poll_results'),
     path('add-user/', views.add_user_and_qr, name='add_user_and_qr'),
+    # path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
+
+
 ]

@@ -18,6 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from polls import views
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def custom_logout_view(request):
+    logout(request)
+    return redirect('/login/')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,7 +32,7 @@ urlpatterns = [
     path('polls/', include('polls.urls')),
     path('login/', views.custom_login_view, name='login'),
     path('questions/', views.questions_view, name='questions'), 
-    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),  # Include other app URLs
+    path('logout/', custom_logout_view, name='logout'),  # Include other app URLs
 ]
 
 
