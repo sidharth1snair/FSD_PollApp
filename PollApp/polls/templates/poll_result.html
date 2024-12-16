@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Results</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            color: #333;
+            background-color: #f3f4f6;
+        }
+
+        header {
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            font-size: 0.9rem;
+            background: #4caf50;
+            color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            /* font-size: 28px; */
+            color: #fbfdfb;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .poll-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .poll-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .poll-question {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .poll-options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .poll-option {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .poll-option span {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .vote-details {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Poll Results</h1>
+    </header>
+
+    <div class="container">
+        {% if polls %}
+            {% for poll in polls %}
+            <div class="poll-card">
+                <div class="poll-question">{{ poll.question }}</div>
+                <ul class="poll-options">
+                    {% for option in poll.options.all %}
+                    <li class="poll-option">
+                        <span>{{ option.text }}</span>
+                        <span class="vote-details">{{ option.votes }} votes ({{ option.percentage|floatformat:2 }}%)</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No polls are available.</p>
+        {% endif %}
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Pollister. All rights reserved.</p>
+    </footer>
+</body>
+</html>

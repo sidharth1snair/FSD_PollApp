@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <style>
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        html, body {
+          height: 100%;
+          background: linear-gradient(#9eca46, #2f6c1c);
+          font-family: 'Arial', sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 50px;
+        }
+
+        .login-wrap {
+          background: white;
+          width: 100%; /* Ensures it stretches across the full width of the screen */
+          max-width: 1200px; /* Increases the max-width to 1200px */
+          padding: 40px; /* Space inside the box */
+          box-sizing: border-box; /* Ensures padding does not affect width */
+        }
+
+        .login-wrap h2 {
+          text-align: center;
+          font-size: 2.5em;
+          margin-bottom: 30px;
+          color: #2c3e50;
+          width: 350px;
+        }
+
+        .form {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .form input[type="text"],
+        .form input[type="password"],
+        .form input[type="otp"] {
+          width: 100%; /* Ensures inputs take full width of the box */
+          margin-bottom: 25px;
+          padding: 12px;
+          font-size: 16px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          transition: border 0.3s ease-in-out;
+        }
+
+        .form input[type="text"]:focus,
+        .form input[type="password"]:focus,
+        .form input[type="otp"]:focus {
+          border: 1px solid #3498db;
+          outline: none;
+        }
+
+        .form button {
+          background: #3498db;
+          color: white;
+          font-size: 18px;
+          padding: 15px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+
+        .form button:hover {
+          background: #2980b9;
+        }
+
+        .form a {
+          text-align: center;
+          font-size: 14px;
+          color: #3498db;
+          text-decoration: none;
+          margin-top: 10px;
+        }
+
+        .form a:hover {
+          text-decoration: underline;
+        }
+
+        .error-message {
+          color: red;
+          font-size: 14px;
+          text-align: center;
+          margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <h2>Login</h2>
+  {% if error %}
+    <p class="error-message">{{ error }}</p>
+  {% endif %}
+  
+  <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    <div class="form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <label for="otp_token">OTP:</label>
+      <input type="text" id="otp_token" name="otp_token" required>
+
+      <button type="submit">Login</button>
+    </div>
+  </form>
+
+</div>
+
+</body>
+</html>

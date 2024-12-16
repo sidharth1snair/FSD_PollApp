@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Questions</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(to right, #4caf50, #2e7d32);
+            color: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background-color: #45a049;
+        }
+
+        .page-header {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #4caf50;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .question-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 700px;
+            padding-left: 5px;
+        }
+
+        .question-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            padding-left: 5px;
+        }
+
+        .vote-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .vote-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .action-button:hover {
+            background-color: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        .action-button:active {
+            transform: scale(0.98);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            background: #4caf50;
+            color: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Pollister</div>
+        <nav>
+            <ul class="nav-links">
+                <!-- <li><a href="/">Home</a></li> -->
+                <li><a href="#">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page-header">
+        <h1>Voting Questions</h1>
+    </div>
+
+    <div class="container">
+        {% for item in polls_with_vote_status %}
+        <div class="question-card" id="poll-{{ item.poll.id }}">
+            <h2>{{ item.poll.question }}</h2>
+            <form action="{% url 'vote' item.poll.id %}" method="POST" class="vote-form">
+                {% csrf_token %}
+                {% if item.has_voted %}
+                    <p style="color: #4caf50;">You have already voted for this question.</p>
+                {% endif %}
+                <div class="vote-options">
+                    {% for option in item.poll.options.all %}
+                    <div class="vote-option">
+                        <input
+                            type="radio"
+                            id="option-{{ option.id }}"
+                            name="option"
+                            value="{{ option.id }}"
+                            {% if item.has_voted %}disabled{% endif %}
+                            required
+                        >
+                        <label for="option-{{ option.id }}">{{ option.text }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not item.has_voted %}
+                    <button type="button" class="action-button submit-btn" onclick="submitVote('{{ item.poll.id }}')">Submit Vote</button>
+                    <p class="success-message" style="display: none; color: green;">Thank you for voting!</p>
+                {% endif %}
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Pollister. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        function submitVote(pollId) {
+            const form = document.querySelector(`#poll-${pollId} .vote-form`);
+            const submitButton = form.querySelector(".submit-btn");
+            const successMessage = form.querySelector(".success-message");
+    
+            const formData = new FormData(form);
+    
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Success: Show the success message and disable the submit button
+                    submitButton.style.display = "none";
+                    successMessage.style.display = "block";
+    
+                    // Disable all options after voting
+                    form.querySelectorAll("input[type='radio']").forEach(input => {
+                        input.disabled = true;
+                    });
+                } else {
+                    alert("There was an error submitting your vote. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("There was an error submitting your vote. Please try again.");
+            });
+        }
+    </script>
+</body>
+</html>
