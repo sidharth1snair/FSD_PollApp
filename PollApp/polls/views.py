@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django_otp.plugins.otp_totp.models import TOTPDevice
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
@@ -181,7 +180,6 @@ def poll_result(request):
 
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from django_otp.plugins.otp_totp.models import TOTPDevice
 import pyotp
 import qrcode
 import io
