@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
-from django_otp.plugins.otp_totp.models import TOTPDevice
 import logging
 from django.http import JsonResponse
 from django.urls import reverse
@@ -49,20 +48,20 @@ def custom_login_view(request):
         password = request.POST.get("password")
         otp_token = request.POST.get("otp_token")
         
-        # Authenticate user
+        
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Check OTP
+            
             totp_device = TOTPDevice.objects.filter(user=user).first()
             if totp_device and totp_device.verify_token(otp_token):
                 login(request, user)
                 
-                # Redirect based on user type
-                if user.is_staff:  # Admin users
-                    return redirect(reverse('homeadmin'))  # Redirect to admin homepage
-                else:  # Normal users
-                    return redirect(reverse('questions'))  # Redirect to questions page
+               
+                if user.is_staff:  
+                    return redirect(reverse('homeadmin'))  
+                else:  
+                    return redirect(reverse('questions'))  
             else:
                 return render(request, "login.html", {"error": "Invalid OTP"})
         else:
@@ -73,23 +72,22 @@ def custom_login_view(request):
 
 
 def homeadmin(request):
-    return render(request, 'homepage.html')  # Ensure homepage.html exists
-
+    return render(request, 'homepage.html')  
 
 
 from django.shortcuts import render
 from .models import Poll
 
 def view_polls(request):
-    polls = Poll.objects.prefetch_related('options').all()  # Fetch all polls with options
+    polls = Poll.objects.prefetch_related('options').all()  
     return render(request, 'view_polls.html', {'polls': polls})
 
 
 def questions_view(request):
-    # Filter only active polls for regular users
+    
     polls = Poll.objects.filter(is_active=True)
 
-    # Annotate polls with whether the current user has voted
+   
     user_votes = UserVote.objects.filter(user=request.user)
     voted_polls = {vote.poll_id for vote in user_votes}
 
@@ -110,7 +108,7 @@ from django.http import JsonResponse
 def vote(request, poll_id):
     poll = get_object_or_404(Poll, id=poll_id)
     
-    # Check if the user has already voted
+    
     if UserVote.objects.filter(user=request.user, poll=poll).exists():
         return JsonResponse({'success': False, 'error': 'You have already voted'}, status=400)
 
@@ -121,10 +119,10 @@ def vote(request, poll_id):
             option.votes += 1
             option.save()
 
-            # Record the user's vote
+           
             UserVote.objects.create(user=request.user, poll=poll)
 
-            # Return a success response
+            
             return JsonResponse({'success': True, 'message': 'Vote submitted successfully'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
@@ -133,11 +131,11 @@ def vote(request, poll_id):
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-# @csrf_exempt  # Allow AJAX requests without CSRF token for testing (not recommended for production)
+
 def toggle_poll_status(request, poll_id):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)  # Parse the JSON payload
+            data = json.loads(request.body) 
             is_active = data.get('is_active', None)
 
             if is_active is None:
@@ -152,7 +150,6 @@ def toggle_poll_status(request, poll_id):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
-# Delete a poll
 def delete_poll(request, poll_id):
     if request.method == 'DELETE':
         poll = get_object_or_404(Poll, id=poll_id)
@@ -197,36 +194,32 @@ def add_user_and_qr(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Check if the username already exists
+        
         if User.objects.filter(username=username).exists():
             return render(request, "add_user_and_qr.html", {"error": "Username already exists."})
 
-        # Step 1: Create the user
+       
         user = User.objects.create_user(username=username, email=email, password=password)
 
-        # Step 2: Generate a valid Base32 TOTP secret
         base32_secret = pyotp.random_base32()
-
-        # Step 3: Convert Base32 to binary
+       
         binary_key = pyotp.TOTP(base32_secret).byte_secret()
-
-
-        # Step 4: Create the TOTP Device and save binary key
+        
         totp_device = TOTPDevice.objects.create(user=user, confirmed=True, name="Default TOTP")
-        totp_device.key = binary_key.hex()  # Save as hex string
+        totp_device.key = binary_key.hex()  
         totp_device.save()
 
-        # Step 5: Generate the provisioning URI
+        
         totp = pyotp.TOTP(base32_secret)
         provisioning_uri = totp.provisioning_uri(name=username, issuer_name="Pollister App")
 
-        # Step 6: Generate QR Code
+       
         qr = qrcode.make(provisioning_uri)
         buffer = io.BytesIO()
         qr.save(buffer, format="PNG")
         qr_base64 = base64.b64encode(buffer.getvalue()).decode()
 
-        # Render the template with the QR Code
+       
         return render(request, "add_user_and_qr.html", {"qr_code": qr_base64, "username": username})
 
     return render(request, "add_user_and_qr.html", {})

@@ -28,11 +28,11 @@ def custom_logout_view(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),  # Home page now renders login.html
+    path('', views.home, name='home'),  
     path('polls/', include('polls.urls')),
     path('login/', views.custom_login_view, name='login'),
     path('questions/', views.questions_view, name='questions'), 
-    path('logout/', custom_logout_view, name='logout'),  # Include other app URLs
+    path('logout/', custom_logout_view, name='logout'),  
 ]
 
 

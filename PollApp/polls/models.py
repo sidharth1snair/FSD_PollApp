@@ -18,7 +18,7 @@ class Option(models.Model):
 class Poll(models.Model):
     question = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)  # New field to track if the poll is active
+    is_active = models.BooleanField(default=True)  
 
     def __str__(self):
         return self.question

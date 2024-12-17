@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Polls</title>
     <style>
-        /* General Styles */
+        
         body {
             margin: 0;
             font-family: 'Roboto', Arial, sans-serif;
@@ -73,7 +73,6 @@
             color: #555;
         }
 
-        /* Buttons */
         .poll-actions {
             margin-top: 15px;
             display: flex;
@@ -120,7 +119,6 @@
             transform: translateY(-2px);
         }
 
-        /* Popup Styles */
         .popup {
             display: none;
             position: fixed;
@@ -162,7 +160,7 @@
             background-color: #2e7d32;
         }
 
-        /* Overlay */
+        
         .overlay {
             display: none;
             position: fixed;
@@ -205,7 +203,7 @@
         <p>&copy; 2024 Pollister. All rights reserved.</p>
     </footer>
 
-    <!-- Popup Modal -->
+  
     <div class="overlay" id="popupOverlay"></div>
     <div class="popup" id="popupModal">
         <h2 id="popupTitle">Success</h2>
@@ -290,7 +288,7 @@
             document.getElementById("popupOverlay").style.display = "none";
             document.getElementById("popupModal").style.display = "none";
 
-            // Remove additional confirm button if present
+            
             const confirmButton = document.querySelector("#popupModal .close-btn:last-of-type");
             if (confirmButton && confirmButton.innerText === "Confirm") {
                 confirmButton.remove();
