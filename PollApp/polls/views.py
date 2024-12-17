@@ -27,12 +27,10 @@ def add_poll(request):
             poll = Poll.objects.create(question=question)
             for option in options:
                 Option.objects.create(poll=poll, text=option)
-            return redirect('home')
+            return redirect('homeadmin')
     return render(request, 'add_poll.html')
 
-def poll_detail(request, poll_id):
-    poll = get_object_or_404(Poll, id=poll_id)
-    return render(request, 'poll.html', {'poll': poll})
+
 
 def vote(request, poll_id):
     poll = get_object_or_404(Poll, id=poll_id)
@@ -44,9 +42,7 @@ def vote(request, poll_id):
         return redirect('poll_result', poll_id=poll.id)
     return redirect('poll_detail', poll_id=poll.id)
 
-def poll_result(request, poll_id):
-    poll = get_object_or_404(Poll, id=poll_id)
-    return render(request, 'poll_result.html', {'poll': poll})
+
 def custom_login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -73,58 +69,13 @@ def custom_login_view(request):
             return render(request, "login.html", {"error": "Invalid username or password"})
     
     return render(request, "login.html")
-def questions_view(request):
-    print("Rendering Questions.html")
-    return render(request, 'Questions.html')
-  # Case-sensitive
+
 
 
 def homeadmin(request):
     return render(request, 'homepage.html')  # Ensure homepage.html exists
 
 
-def add_poll(request):
-    if request.method == "POST":
-        question = request.POST.get('question')
-        options = request.POST.getlist('option[]')
-        if question and options:
-            poll = Poll.objects.create(question=question)
-            for option in options:
-                Option.objects.create(poll=poll, text=option)
-            return redirect('homeadmin')  # Redirect back to admin homepage after creating poll
-    return render(request, 'add_poll.html')
-
-
-
-
-def poll_result(request, poll_id):
-    poll = get_object_or_404(Poll, id=poll_id)
-    total_votes = sum(option.votes for option in poll.options.all())  # Use poll.options instead of poll.option_set
-
-    # Calculate percentage for each option
-    for option in poll.options.all():  # Use poll.options here too
-        option.percentage = (option.votes / total_votes * 100) if total_votes > 0 else 0
-
-    return render(request, 'poll_result.html', {'poll': poll})
-
-
-def add_poll(request):
-    if request.method == "POST":
-        question = request.POST.get('question')  # Get the poll question
-        options = request.POST.getlist('option[]')  # Get the list of options
-        
-        if question and options:  # Ensure both question and options are provided
-            # Save the poll question
-            poll = Poll.objects.create(question=question)
-
-            # Save each option
-            for option_text in options:
-                Option.objects.create(poll=poll, text=option_text)
-
-            # Redirect to the admin home page after saving
-            return redirect('homeadmin')
-
-    return render(request, 'add_poll.html')
 
 from django.shortcuts import render
 from .models import Poll
@@ -132,12 +83,6 @@ from .models import Poll
 def view_polls(request):
     polls = Poll.objects.prefetch_related('options').all()  # Fetch all polls with options
     return render(request, 'view_polls.html', {'polls': polls})
-
-def poll_detail(request, poll_id):
-    poll = get_object_or_404(Poll, id=poll_id)
-    return render(request, 'poll.html', {'poll': poll})
-
-
 
 
 def questions_view(request):
@@ -160,13 +105,14 @@ def questions_view(request):
 
 
 
+from django.http import JsonResponse
+
 def vote(request, poll_id):
     poll = get_object_or_404(Poll, id=poll_id)
     
     # Check if the user has already voted
     if UserVote.objects.filter(user=request.user, poll=poll).exists():
-        # User has already voted; just render the page with options frozen
-        return render(request, 'poll.html', {'poll': poll, 'voted': True})
+        return JsonResponse({'success': False, 'error': 'You have already voted'}, status=400)
 
     if request.method == "POST":
         option_id = request.POST.get("option")
@@ -178,15 +124,16 @@ def vote(request, poll_id):
             # Record the user's vote
             UserVote.objects.create(user=request.user, poll=poll)
 
-            # Render the page with options frozen
-            return render(request, 'poll.html', {'poll': poll, 'voted': True})
+            # Return a success response
+            return JsonResponse({'success': True, 'message': 'Vote submitted successfully'})
 
-    return render(request, 'poll.html', {'poll': poll})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
 
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-@csrf_exempt  # Allow AJAX requests without CSRF token for testing (not recommended for production)
+# @csrf_exempt  # Allow AJAX requests without CSRF token for testing (not recommended for production)
 def toggle_poll_status(request, poll_id):
     if request.method == 'POST':
         try:
@@ -220,29 +167,19 @@ from .models import Poll
 
 def poll_result(request):
     try:
-        # Fetch all polls and their options
+       
         polls = Poll.objects.prefetch_related('options').all()
 
-        # Debug log: Check if polls are being fetched
-        print("Fetched polls:", polls)
-
-        # Calculate vote percentages for each option
         for poll in polls:
             total_votes = sum(option.votes for option in poll.options.all())
             for option in poll.options.all():
                 option.percentage = (option.votes / total_votes * 100) if total_votes > 0 else 0
-
-                # Debug log for each option
-                print(f"Poll: {poll.question}, Option: {option.text}, Votes: {option.votes}, Percentage: {option.percentage}")
 
         return render(request, 'poll_result.html', {'polls': polls})
 
     except Exception as e:
         print("Error occurred:", e)
         return render(request, 'poll_result.html', {'polls': []})
-
-
-
 
 
 from django.shortcuts import render
